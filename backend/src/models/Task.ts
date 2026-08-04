@@ -3,9 +3,9 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface ITask extends Document {
     title: string;
     description?: string;
-    taskpiority: 'Low' | 'Medium' | 'High';
-    taskstatus: 'To Do' | 'In Progress' | 'Done';
-    deadline: Date;
+    priority: 'Low' | 'Medium' | 'High';
+    status: 'To Do' | 'In Progress' | 'Done';
+    dueDate: Date;
     user: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
