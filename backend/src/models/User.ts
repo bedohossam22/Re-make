@@ -3,13 +3,13 @@ import bcrypt from 'bcryptjs';
 
 // Dfine interface
 
+
 export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
-
 
 //User Schema
 const userSchema = new Schema<IUser>(
