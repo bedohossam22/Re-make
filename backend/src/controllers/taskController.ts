@@ -185,20 +185,30 @@ export const updateTask = async (req: Request, res: Response) => {
 };
 
 export const deleteTask = async (req: Request, res: Response) => {
-    // 5. DELETE TASK
-    //    - Get task id from req.params
-    //    - Find and delete task by _id AND user: req.user._id
-    //    - If not found -> 404
-    //    - Return success message
-    const taskId = req.params.id
+    try {
+        const taskId = req.params.id;
 
-    const task = await Task.findOneAndDelete({
-        _id: taskId,
-        user: req.user._id,
-    })
-    res.json({
-        success: true,
-        message: 'Task Deleted successfully'
-    });
-}
+        const task = await Task.findOneAndDelete({
+            _id: taskId,
+            user: req.user._id,
+        });
+
+        if (!task) {
+            return res.status(404).json({
+                success: false,
+                message: 'Task not found',
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Task deleted successfully',
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting task',
+        });
+    }
+};
 
