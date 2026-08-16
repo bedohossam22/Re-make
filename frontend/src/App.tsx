@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import NotAuthorizedPage from './pages/NotAuthorizedPage';
+import ServerErrorPage from './pages/ServerErrorPage';
+import MaintenancePage from './pages/MaintenancePage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export const App: React.FC = () => {
@@ -22,6 +24,8 @@ export const App: React.FC = () => {
 
       {/* Error & Fallback Routes */}
       <Route path="/not-authorized" element={<NotAuthorizedPage />} />
+      <Route path="/500" element={<ServerErrorPage />} />
+      <Route path="/maintenance" element={<MaintenancePage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
