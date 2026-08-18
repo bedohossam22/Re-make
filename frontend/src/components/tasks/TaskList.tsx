@@ -1,5 +1,5 @@
 import React from 'react';
-import { ITask, TaskStatus } from '../../types';
+import type { ITask, TaskStatus } from '../../types';
 import TaskCard from './TaskCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 

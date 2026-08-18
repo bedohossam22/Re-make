@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../hooks/useAuth';
-import { LoginCredentials } from '../../types';
+import type { LoginCredentials } from '../../types';
 import { getErrorMessage } from '../../utils/helpers';
 
 const schema = yup.object().shape({

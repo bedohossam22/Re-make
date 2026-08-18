@@ -3,12 +3,13 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { toast } from 'react-toastify';
-import { ITask, TaskPriority, TaskStatus } from '../../types';
+import type { ITask, TaskPriority, TaskStatus } from '../../types';
 import { taskService } from '../../services/api';
 import { formatInputDate, getErrorMessage } from '../../utils/helpers';
 
 interface TaskFormProps {
   task?: ITask | null;
+  initialStatus?: TaskStatus;
   isOpen: boolean;
   onClose: () => void;
   onSubmitSuccess: () => void;
@@ -41,6 +42,7 @@ const schema = yup.object().shape({
 
 export const TaskForm: React.FC<TaskFormProps> = ({
   task,
+  initialStatus,
   isOpen,
   onClose,
   onSubmitSuccess,
@@ -57,7 +59,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     defaultValues: {
       title: '',
       description: '',
-      status: 'To Do',
+      status: initialStatus || 'To Do',
       priority: 'Medium',
       dueDate: new Date().toISOString().split('T')[0],
     },
@@ -76,12 +78,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       reset({
         title: '',
         description: '',
-        status: 'To Do',
+        status: initialStatus || 'To Do',
         priority: 'Medium',
         dueDate: new Date().toISOString().split('T')[0],
       });
     }
-  }, [task, reset, isOpen]);
+  }, [task, initialStatus, reset, isOpen]);
 
   if (!isOpen) return null;
 

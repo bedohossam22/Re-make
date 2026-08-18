@@ -1,18 +1,24 @@
 import React from 'react';
-import { TaskFilterState } from '../../types';
+import type { TaskFilterState } from '../../types';
+
+export type ViewMode = 'grid' | 'kanban';
 
 interface TaskFiltersProps {
   filters: TaskFilterState;
   onFilterChange: (newFilters: TaskFilterState) => void;
   onReset: () => void;
   totalTasks: number;
+  viewMode?: ViewMode;
+  onViewModeChange?: (mode: ViewMode) => void;
 }
 
 export const TaskFilters: React.FC<TaskFiltersProps> = ({
   filters,
   onFilterChange,
   onReset,
-  totalTasks,
+  totalTasks: _,
+  viewMode = 'grid',
+  onViewModeChange,
 }) => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFilterChange({ ...filters, search: e.target.value });
@@ -57,13 +63,48 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
           )}
         </div>
 
-        {/* Dropdowns & Actions */}
+        {/* Dropdowns & View Switcher */}
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
+          {/* View Switcher Toggle */}
+          {onViewModeChange && (
+            <div className="flex items-center p-1 bg-slate-900/90 rounded-xl border border-slate-800 shrink-0">
+              <button
+                type="button"
+                onClick={() => onViewModeChange('grid')}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  viewMode === 'grid'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span>Grid</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onViewModeChange('kanban')}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  viewMode === 'kanban'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V5m6 12V5M3 19h18a1 1 0 001-1V6a1 1 0 00-1-1H3a1 1 0 00-1 1v12a1 1 0 001 1z" />
+                </svg>
+                <span>Kanban</span>
+              </button>
+            </div>
+          )}
+
           {/* Status Dropdown */}
           <select
             value={filters.status || ''}
             onChange={handleStatusChange}
-            className="input-field py-2.5 px-3 text-sm bg-slate-900/80 cursor-pointer min-w-[130px]"
+            className="input-field py-2.5 px-3 text-sm bg-slate-900/80 cursor-pointer min-w-[120px]"
           >
             <option value="">All Statuses</option>
             <option value="To Do">To Do</option>
@@ -75,7 +116,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
           <select
             value={filters.priority || ''}
             onChange={handlePriorityChange}
-            className="input-field py-2.5 px-3 text-sm bg-slate-900/80 cursor-pointer min-w-[130px]"
+            className="input-field py-2.5 px-3 text-sm bg-slate-900/80 cursor-pointer min-w-[120px]"
           >
             <option value="">All Priorities</option>
             <option value="High">High</option>

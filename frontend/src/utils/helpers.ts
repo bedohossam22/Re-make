@@ -1,4 +1,4 @@
-import { TaskPriority, TaskStatus } from '../types';
+import type { TaskPriority, TaskStatus } from '../types';
 
 /**
  * Format ISO date string into a human readable string.

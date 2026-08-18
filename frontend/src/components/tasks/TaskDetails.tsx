@@ -1,5 +1,5 @@
 import React from 'react';
-import { ITask } from '../../types';
+import type { ITask } from '../../types';
 import {
   formatDate,
   isOverdue,

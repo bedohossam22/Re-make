@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import Navbar from '../components/common/Navbar';
 import TaskFilters from '../components/tasks/TaskFilters';
+import type { ViewMode } from '../components/tasks/TaskFilters';
 import TaskList from '../components/tasks/TaskList';
+import KanbanBoard from '../components/tasks/KanbanBoard';
 import TaskForm from '../components/tasks/TaskForm';
 import TaskDetails from '../components/tasks/TaskDetails';
-import { ITask, TaskFilterState, TaskStatus } from '../types';
+import type { ITask, TaskFilterState, TaskStatus } from '../types';
 import { taskService } from '../services/api';
 import { isOverdue, getErrorMessage } from '../utils/helpers';
 
@@ -13,10 +15,12 @@ export const DashboardPage: React.FC = () => {
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState<TaskFilterState>({});
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   // Modal states
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
+  const [initialFormStatus, setInitialFormStatus] = useState<TaskStatus | undefined>(undefined);
 
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
@@ -45,13 +49,15 @@ export const DashboardPage: React.FC = () => {
   }, [fetchTasks]);
 
   // Handlers for Modals
-  const handleOpenCreateModal = () => {
+  const handleOpenCreateModal = (status?: TaskStatus) => {
     setEditingTask(null);
+    setInitialFormStatus(status);
     setIsFormOpen(true);
   };
 
   const handleOpenEditModal = (task: ITask) => {
     setEditingTask(task);
+    setInitialFormStatus(undefined);
     setIsFormOpen(true);
   };
 
@@ -113,7 +119,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <button
-            onClick={handleOpenCreateModal}
+            onClick={() => handleOpenCreateModal()}
             className="btn-primary py-3 px-5 rounded-xl font-semibold flex items-center justify-center space-x-2 shrink-0 shadow-lg shadow-indigo-500/25"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,24 +163,39 @@ export const DashboardPage: React.FC = () => {
           onFilterChange={setFilters}
           onReset={() => setFilters({})}
           totalTasks={totalCount}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
         />
 
-        {/* Task Grid / List */}
-        <TaskList
-          tasks={tasks}
-          isLoading={isLoading}
-          onViewTask={handleOpenDetailsModal}
-          onEditTask={handleOpenEditModal}
-          onDeleteTask={(id) => setDeletingTaskId(id)}
-          onStatusChange={handleStatusChange}
-          onCreateTaskClick={handleOpenCreateModal}
-        />
+        {/* Task Grid / Kanban Board */}
+        {viewMode === 'grid' ? (
+          <TaskList
+            tasks={tasks}
+            isLoading={isLoading}
+            onViewTask={handleOpenDetailsModal}
+            onEditTask={handleOpenEditModal}
+            onDeleteTask={(id) => setDeletingTaskId(id)}
+            onStatusChange={handleStatusChange}
+            onCreateTaskClick={() => handleOpenCreateModal()}
+          />
+        ) : (
+          <KanbanBoard
+            tasks={tasks}
+            isLoading={isLoading}
+            onViewTask={handleOpenDetailsModal}
+            onEditTask={handleOpenEditModal}
+            onDeleteTask={(id) => setDeletingTaskId(id)}
+            onStatusChange={handleStatusChange}
+            onAddTaskInStatus={(status) => handleOpenCreateModal(status)}
+          />
+        )}
       </main>
 
       {/* Task Create / Edit Modal */}
       <TaskForm
         isOpen={isFormOpen}
         task={editingTask}
+        initialStatus={initialFormStatus}
         onClose={() => setIsFormOpen(false)}
         onSubmitSuccess={fetchTasks}
       />
