@@ -47,7 +47,10 @@ export const getTasks = async (req: Request, res: Response) => {
 
         if (status) query.status = status;
         if (priority) query.priority = priority;
-        if (search) query.title = { $regex: search, $options: 'i' };
+        if (search) {
+            const escapedSearch = String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            query.title = { $regex: escapedSearch, $options: 'i' };
+        }
 
         const tasks = await Task.find(query).sort({ createdAt: -1 });
 

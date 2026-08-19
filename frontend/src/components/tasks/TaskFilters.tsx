@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { TaskFilterState } from '../../types';
 
 export type ViewMode = 'grid' | 'kanban';
@@ -20,9 +20,21 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
   viewMode = 'grid',
   onViewModeChange,
 }) => {
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFilterChange({ ...filters, search: e.target.value });
-  };
+  const [searchTerm, setSearchTerm] = useState(filters.search || '');
+
+  useEffect(() => {
+    setSearchTerm(filters.search || '');
+  }, [filters.search]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if ((filters.search || '') !== searchTerm) {
+        onFilterChange({ ...filters, search: searchTerm });
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onFilterChange({ ...filters, status: e.target.value });
@@ -46,14 +58,17 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
           </div>
           <input
             type="text"
-            value={filters.search || ''}
-            onChange={handleSearchChange}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search tasks by title..."
             className="input-field pl-10 pr-10 py-2.5 text-sm w-full"
           />
-          {filters.search && (
+          {searchTerm && (
             <button
-              onClick={() => onFilterChange({ ...filters, search: '' })}
+              onClick={() => {
+                setSearchTerm('');
+                onFilterChange({ ...filters, search: '' });
+              }}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

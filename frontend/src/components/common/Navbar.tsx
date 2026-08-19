@@ -13,7 +13,9 @@ export const Navbar: React.FC = () => {
 
   const userInitials = user?.name
     ? user.name
-        .split(' ')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
         .map((n) => n[0])
         .join('')
         .toUpperCase()

@@ -22,16 +22,25 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
   onStatusChange,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [wasDragged, setWasDragged] = useState(false);
   const overdue = isOverdue(task.dueDate, task.status);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData('text/plain', task._id);
     e.dataTransfer.effectAllowed = 'move';
     setIsDragging(true);
+    setWasDragged(true);
   };
 
   const handleDragEnd = () => {
     setIsDragging(false);
+    setTimeout(() => setWasDragged(false), 150);
+  };
+
+  const handleClick = () => {
+    if (!wasDragged) {
+      onView(task);
+    }
   };
 
   const getPreviousStatus = (current: TaskStatus): TaskStatus | null => {
@@ -54,7 +63,7 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
       draggable
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onClick={() => onView(task)}
+      onClick={handleClick}
       className={`glass-card p-4 rounded-xl border border-slate-700/60 bg-slate-900/60 hover:border-indigo-500/50 transition-all duration-200 cursor-grab active:cursor-grabbing select-none group relative ${
         isDragging ? 'opacity-40 scale-95 border-dashed border-indigo-400' : 'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/10'
       }`}

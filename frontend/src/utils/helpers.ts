@@ -29,11 +29,14 @@ export const formatInputDate = (dateString: string): string => {
  */
 export const isOverdue = (dueDate: string, status: TaskStatus): boolean => {
   if (status === 'Done' || !dueDate) return false;
-  const due = new Date(dueDate);
-  const now = new Date();
-  // Strip time for fair date comparison
-  due.setHours(23, 59, 59, 999);
-  return due < now;
+  const dueStr = formatInputDate(dueDate);
+  if (!dueStr) return false;
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
+  return dueStr < todayStr;
 };
 
 /**
@@ -77,10 +80,10 @@ export const getErrorMessage = (error: any): string => {
 
   if (error.response?.data) {
     const data = error.response.data;
-    if (data.message) return data.message;
     if (Array.isArray(data.errors) && data.errors.length > 0) {
       return data.errors.map((err: any) => err.msg || err.message).join(', ');
     }
+    if (data.message) return data.message;
   }
 
   if (error.message) return error.message;
