@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { Timer } from './Timer';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -57,7 +58,8 @@ export const Navbar: React.FC = () => {
 
         {/* User Info & Actions */}
         {user && (
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <Timer />
             <div className="hidden md:flex items-center space-x-3 bg-slate-800/50 border border-slate-700/50 rounded-full py-1.5 px-3.5">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-teal-400 text-white font-bold flex items-center justify-center text-xs shadow-md">
                 {userInitials}
