@@ -48,7 +48,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
 
   return (
     <div className="glass-card p-4 sm:p-5 mb-6">
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Search Bar */}
         <div className="relative flex-1">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -61,7 +61,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search tasks by title..."
-            className="input-field pl-10 pr-10 py-2.5 text-sm w-full"
+            className="input-field pl-10 pr-10 py-2.5 text-sm w-full bg-slate-900/90 border-slate-800 focus:border-indigo-500"
           />
           {searchTerm && (
             <button
@@ -70,6 +70,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
                 onFilterChange({ ...filters, search: '' });
               }}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white"
+              aria-label="Clear search"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -79,7 +80,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
         </div>
 
         {/* Dropdowns & View Switcher */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           {/* View Switcher Toggle */}
           {onViewModeChange && (
             <div className="flex items-center p-1 bg-slate-900/90 rounded-xl border border-slate-800 shrink-0">
@@ -88,7 +89,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
                 onClick={() => onViewModeChange('grid')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   viewMode === 'grid'
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -103,7 +104,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
                 onClick={() => onViewModeChange('kanban')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   viewMode === 'kanban'
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -119,7 +120,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
           <select
             value={filters.status || ''}
             onChange={handleStatusChange}
-            className="input-field py-2.5 px-3 text-sm bg-slate-900/80 cursor-pointer min-w-[120px]"
+            className="input-field py-2.5 px-3 text-xs sm:text-sm bg-slate-900/90 border-slate-800 focus:border-indigo-500 cursor-pointer min-w-[110px] flex-1 sm:flex-none"
           >
             <option value="">All Statuses</option>
             <option value="To Do">To Do</option>
@@ -131,7 +132,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
           <select
             value={filters.priority || ''}
             onChange={handlePriorityChange}
-            className="input-field py-2.5 px-3 text-sm bg-slate-900/80 cursor-pointer min-w-[120px]"
+            className="input-field py-2.5 px-3 text-xs sm:text-sm bg-slate-900/90 border-slate-800 focus:border-indigo-500 cursor-pointer min-w-[110px] flex-1 sm:flex-none"
           >
             <option value="">All Priorities</option>
             <option value="High">High</option>
@@ -143,7 +144,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
           {hasActiveFilters && (
             <button
               onClick={onReset}
-              className="btn-secondary py-2.5 px-4 text-xs font-medium shrink-0 flex items-center space-x-1 hover:border-slate-500"
+              className="btn-secondary py-2.5 px-3.5 text-xs font-medium shrink-0 flex items-center space-x-1 hover:border-slate-500"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

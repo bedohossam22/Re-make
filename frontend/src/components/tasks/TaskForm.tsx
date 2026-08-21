@@ -115,17 +115,18 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
       <div
-        className="glass-card w-full max-w-lg p-6 sm:p-8 relative shadow-2xl border border-slate-700/60"
+        className="glass-card w-full max-w-lg p-5 sm:p-7 relative shadow-2xl border border-slate-700/60 max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
-          <h2 className="text-xl font-bold text-slate-100">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800 shrink-0">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-100">
             {isEditMode ? 'Edit Task' : 'Create New Task'}
           </h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            aria-label="Close modal"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -133,11 +134,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Form body */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto pr-1 flex-1">
           {/* Title */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
               Task Title *
             </label>
             <input
@@ -147,31 +148,31 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               className={`input-field ${errors.title ? 'border-red-500' : ''}`}
             />
             {errors.title && (
-              <p className="mt-1 text-xs text-red-400">{errors.title.message}</p>
+              <p className="mt-1 text-xs text-red-400 font-medium">{errors.title.message}</p>
             )}
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
               Description (Optional)
             </label>
             <textarea
               rows={3}
               placeholder="Add extra context or sub-tasks..."
               {...register('description')}
-              className="input-field resize-none"
+              className="input-field resize-none text-sm"
             />
           </div>
 
           {/* Grid: Status, Priority, Due Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             {/* Status */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
                 Status
               </label>
-              <select {...register('status')} className="input-field bg-slate-900 cursor-pointer text-sm py-2 px-2.5">
+              <select {...register('status')} className="input-field bg-slate-900 cursor-pointer text-xs sm:text-sm py-2 px-2.5">
                 <option value="To Do">To Do</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Done">Done</option>
@@ -180,10 +181,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
             {/* Priority */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
                 Priority
               </label>
-              <select {...register('priority')} className="input-field bg-slate-900 cursor-pointer text-sm py-2 px-2.5">
+              <select {...register('priority')} className="input-field bg-slate-900 cursor-pointer text-xs sm:text-sm py-2 px-2.5">
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
@@ -192,33 +193,33 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
             {/* Due Date */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
                 Due Date *
               </label>
               <input
                 type="date"
                 {...register('dueDate')}
-                className={`input-field bg-slate-900 cursor-pointer text-sm py-2 px-2.5 ${errors.dueDate ? 'border-red-500' : ''}`}
+                className={`input-field bg-slate-900 cursor-pointer text-xs sm:text-sm py-2 px-2.5 ${errors.dueDate ? 'border-red-500' : ''}`}
               />
               {errors.dueDate && (
-                <p className="mt-1 text-xs text-red-400">{errors.dueDate.message}</p>
+                <p className="mt-1 text-xs text-red-400 font-medium">{errors.dueDate.message}</p>
               )}
             </div>
           </div>
 
           {/* Buttons */}
-          <div className="flex items-center justify-end space-x-3 pt-4 mt-6 border-t border-slate-800">
+          <div className="flex items-center justify-end space-x-3 pt-4 mt-4 border-t border-slate-800 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary text-sm"
+              className="btn-secondary text-xs sm:text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary text-sm min-w-[100px] flex items-center justify-center"
+              className="btn-primary text-xs sm:text-sm min-w-[110px] flex items-center justify-center"
             >
               {isSubmitting ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -7,6 +7,7 @@ import TaskList from '../components/tasks/TaskList';
 import KanbanBoard from '../components/tasks/KanbanBoard';
 import TaskForm from '../components/tasks/TaskForm';
 import TaskDetails from '../components/tasks/TaskDetails';
+import { StatsSkeleton } from '../components/common/Skeleton';
 import type { ITask, TaskFilterState, TaskStatus } from '../types';
 import { taskService } from '../services/api';
 import { isOverdue, getErrorMessage } from '../utils/helpers';
@@ -103,24 +104,24 @@ export const DashboardPage: React.FC = () => {
   const overdueCount = tasks.filter((t) => isOverdue(t.dueDate, t.status)).length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Dashboard Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Task Dashboard
             </h1>
-            <p className="text-sm text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">
               Organize, track, and accomplish your tasks efficiently.
             </p>
           </div>
 
           <button
             onClick={() => handleOpenCreateModal()}
-            className="btn-primary py-3 px-5 rounded-xl font-semibold flex items-center justify-center space-x-2 shrink-0 shadow-lg shadow-indigo-500/25"
+            className="btn-primary py-2.5 sm:py-3 px-5 rounded-xl font-semibold flex items-center justify-center space-x-2 shrink-0 shadow-lg shadow-indigo-500/25"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -130,32 +131,36 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-8">
-          <div className="glass-card p-4 flex flex-col justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total</span>
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-2">{totalCount}</span>
-          </div>
+        {isLoading ? (
+          <StatsSkeleton />
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="glass-card p-4 flex flex-col justify-between hover:border-slate-700 transition-colors">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total</span>
+              <span className="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-2">{totalCount}</span>
+            </div>
 
-          <div className="glass-card p-4 flex flex-col justify-between border-l-4 border-l-slate-400">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">To Do</span>
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-200 mt-2">{todoCount}</span>
-          </div>
+            <div className="glass-card p-4 flex flex-col justify-between border-l-4 border-l-slate-400 hover:border-slate-700 transition-colors">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">To Do</span>
+              <span className="text-2xl sm:text-3xl font-extrabold text-slate-200 mt-2">{todoCount}</span>
+            </div>
 
-          <div className="glass-card p-4 flex flex-col justify-between border-l-4 border-l-blue-500">
-            <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">In Progress</span>
-            <span className="text-2xl sm:text-3xl font-extrabold text-blue-300 mt-2">{progressCount}</span>
-          </div>
+            <div className="glass-card p-4 flex flex-col justify-between border-l-4 border-l-blue-500 hover:border-slate-700 transition-colors">
+              <span className="text-[11px] font-bold text-blue-400 uppercase tracking-wider">In Progress</span>
+              <span className="text-2xl sm:text-3xl font-extrabold text-blue-300 mt-2">{progressCount}</span>
+            </div>
 
-          <div className="glass-card p-4 flex flex-col justify-between border-l-4 border-l-green-500">
-            <span className="text-xs font-semibold text-green-400 uppercase tracking-wider">Done</span>
-            <span className="text-2xl sm:text-3xl font-extrabold text-green-300 mt-2">{doneCount}</span>
-          </div>
+            <div className="glass-card p-4 flex flex-col justify-between border-l-4 border-l-emerald-500 hover:border-slate-700 transition-colors">
+              <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Done</span>
+              <span className="text-2xl sm:text-3xl font-extrabold text-emerald-300 mt-2">{doneCount}</span>
+            </div>
 
-          <div className="glass-card p-4 flex flex-col justify-between border-l-4 border-l-red-500 col-span-2 sm:col-span-1">
-            <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Overdue</span>
-            <span className="text-2xl sm:text-3xl font-extrabold text-red-400 mt-2">{overdueCount}</span>
+            <div className="glass-card p-4 flex flex-col justify-between border-l-4 border-l-rose-500 col-span-2 sm:col-span-1 hover:border-slate-700 transition-colors">
+              <span className="text-[11px] font-bold text-rose-400 uppercase tracking-wider">Overdue</span>
+              <span className="text-2xl sm:text-3xl font-extrabold text-rose-400 mt-2">{overdueCount}</span>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Filters */}
         <TaskFilters
@@ -211,9 +216,9 @@ export const DashboardPage: React.FC = () => {
 
       {/* Delete Confirmation Dialog */}
       {deletingTaskId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="glass-card max-w-sm w-full p-6 text-center border border-red-500/30">
-            <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mx-auto mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+          <div className="glass-card max-w-sm w-full p-6 text-center border border-rose-500/30">
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto mb-4 border border-rose-500/20">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
@@ -227,14 +232,14 @@ export const DashboardPage: React.FC = () => {
               <button
                 onClick={() => setDeletingTaskId(null)}
                 disabled={isDeleting}
-                className="btn-secondary text-xs py-2 px-4 rounded-lg"
+                className="btn-secondary text-xs py-2 px-4 rounded-xl"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
                 disabled={isDeleting}
-                className="btn-danger text-xs py-2 px-4 rounded-lg flex items-center space-x-1"
+                className="btn-danger text-xs py-2 px-4 rounded-xl flex items-center space-x-1"
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
