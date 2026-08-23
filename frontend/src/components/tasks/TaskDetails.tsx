@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ITask } from '../../types';
+import { useTimer } from '../../context/TimerContext';
 import {
   formatDate,
   isOverdue,
@@ -22,9 +23,18 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { setAttachedTask, setIsModalOpen, startTimer } = useTimer();
+
   if (!isOpen || !task) return null;
 
   const overdue = isOverdue(task.dueDate, task.status);
+
+  const handleStartFocus = () => {
+    onClose();
+    setAttachedTask(task._id, task.title);
+    startTimer();
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
@@ -90,25 +100,37 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800 shrink-0">
+        <div className="flex items-center justify-between pt-4 border-t border-slate-800 shrink-0">
           <button
-            onClick={() => {
-              onClose();
-              onDelete(task._id);
-            }}
-            className="btn-danger text-xs sm:text-sm"
+            onClick={handleStartFocus}
+            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition-all"
           >
-            Delete Task
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Start Focus Timer</span>
           </button>
-          <button
-            onClick={() => {
-              onClose();
-              onEdit(task);
-            }}
-            className="btn-primary text-xs sm:text-sm"
-          >
-            Edit Task
-          </button>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => {
+                onClose();
+                onDelete(task._id);
+              }}
+              className="btn-danger text-xs sm:text-sm"
+            >
+              Delete
+            </button>
+            <button
+              onClick={() => {
+                onClose();
+                onEdit(task);
+              }}
+              className="btn-primary text-xs sm:text-sm"
+            >
+              Edit
+            </button>
+          </div>
         </div>
       </div>
     </div>

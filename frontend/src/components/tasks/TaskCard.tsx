@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ITask, TaskStatus } from '../../types';
+import { useTimer } from '../../context/TimerContext';
 import {
   formatDate,
   isOverdue,
@@ -22,6 +23,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onDelete,
   onStatusChange,
 }) => {
+  const { setAttachedTask, setIsModalOpen, startTimer, attachedTaskId } = useTimer();
   const overdue = isOverdue(task.dueDate, task.status);
 
   const getNextStatus = (current: TaskStatus): TaskStatus => {
@@ -38,16 +40,34 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
+  const handleStartFocus = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setAttachedTask(task._id, task.title);
+    startTimer();
+    setIsModalOpen(true);
+  };
+
+  const isCurrentFocusTask = attachedTaskId === task._id;
+
   return (
     <div
       onClick={() => onView(task)}
-      className="glass-card p-5 hover:border-indigo-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between group relative hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/15 border border-slate-800/80 bg-slate-900/60"
+      className={`glass-card p-5 hover:border-indigo-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between group relative hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/15 border bg-slate-900/60 ${
+        isCurrentFocusTask ? 'border-indigo-500/80 ring-1 ring-indigo-500/50' : 'border-slate-800/80'
+      }`}
     >
       <div>
         {/* Card Header: Status & Priority Badges */}
         <div className="flex items-center justify-between gap-2 mb-3.5">
           <span className={getStatusBadgeClass(task.status)}>{task.status}</span>
-          <span className={getPriorityBadgeClass(task.priority)}>{task.priority}</span>
+          <div className="flex items-center space-x-1.5">
+            {isCurrentFocusTask && (
+              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full animate-pulse">
+                🎯 Focusing
+              </span>
+            )}
+            <span className={getPriorityBadgeClass(task.priority)}>{task.priority}</span>
+          </div>
         </div>
 
         {/* Task Title */}
@@ -83,6 +103,20 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={handleStartFocus}
+            title="Start Pomodoro Focus on this Task"
+            className={`p-1.5 rounded-lg transition-colors ${
+              isCurrentFocusTask
+                ? 'text-indigo-400 bg-indigo-500/20 border border-indigo-500/40'
+                : 'text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+
           {onStatusChange && (
             <button
               onClick={handleQuickStatusToggle}
