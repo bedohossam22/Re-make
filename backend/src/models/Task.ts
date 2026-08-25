@@ -7,6 +7,7 @@ export interface ITask extends Document {
     status: 'To Do' | 'In Progress' | 'Done';
     dueDate: Date;
     user: mongoose.Types.ObjectId;
+    createdBy?: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -46,6 +47,10 @@ const taskSchema = new Schema<ITask>(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true,
+        },
+        createdBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
         },
     },
     {
