@@ -70,5 +70,14 @@ export const updateTaskValidation = [
     body('dueDate')
         .optional()
         .isISO8601()
-        .withMessage('Invalid date format'),
+        .withMessage('Invalid date format')
+        .custom((value) => {
+            if (!value) return true;
+            const inputDateStr = value.split('T')[0];
+            const todayDateStr = new Date().toISOString().split('T')[0];
+            if (inputDateStr < todayDateStr) {
+                throw new Error('Due date cannot be in the past');
+            }
+            return true;
+        }),
 ];

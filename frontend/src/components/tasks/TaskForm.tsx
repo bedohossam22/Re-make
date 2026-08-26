@@ -37,7 +37,18 @@ const schema = yup.object().shape({
     .mixed<TaskPriority>()
     .oneOf(['Low', 'Medium', 'High'])
     .required('Priority is required'),
-  dueDate: yup.string().required('Due date is required'),
+  dueDate: yup
+    .string()
+    .required('Due date is required')
+    .test('not-in-past', 'Due date cannot be in the past', (value) => {
+      if (!value) return true;
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+      return value >= todayStr;
+    }),
 });
 
 export const TaskForm: React.FC<TaskFormProps> = ({
@@ -198,6 +209,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               </label>
               <input
                 type="date"
+                min={getTodayFormatted()}
                 {...register('dueDate')}
                 className={`input-field bg-slate-900 cursor-pointer text-xs sm:text-sm py-2 px-2.5 ${errors.dueDate ? 'border-red-500' : ''}`}
               />
