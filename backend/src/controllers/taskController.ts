@@ -42,7 +42,7 @@ import { Task } from '../models/Task';
 
 export const getTasks = async (req: Request, res: Response) => {
     try {
-        const { status, priority, search } = req.query;
+        const { status, priority, search, page, limit, sortBy, sortOrder } = req.query;
         const query: any = { user: req.user._id };
 
         if (status) query.status = status;
@@ -52,11 +52,44 @@ export const getTasks = async (req: Request, res: Response) => {
             query.title = { $regex: escapedSearch, $options: 'i' };
         }
 
-        const tasks = await Task.find(query).sort({ createdAt: -1 });
+        // Sorting configuration
+        const validSortFields: Record<string, string> = {
+            createdAt: 'createdAt',
+            dueDate: 'dueDate',
+            priority: 'priority',
+            title: 'title',
+        };
+
+        const sortField = validSortFields[String(sortBy)] || 'createdAt';
+        const sortDirection = sortOrder === 'asc' ? 1 : -1;
+        const sortOptions: any = { [sortField]: sortDirection };
+
+        // Count total matching documents
+        const total = await Task.countDocuments(query);
+
+        // Pagination calculations
+        const isPaginated = page !== undefined || limit !== undefined;
+        const pageNum = Math.max(1, parseInt(String(page || '1'), 10) || 1);
+        const limitNum = Math.max(1, parseInt(String(limit || '10'), 10) || 10);
+        const skip = (pageNum - 1) * limitNum;
+
+        let taskQuery = Task.find(query).sort(sortOptions);
+        if (isPaginated) {
+            taskQuery = taskQuery.skip(skip).limit(limitNum);
+        }
+
+        const tasks = await taskQuery;
+
+        const totalPages = isPaginated ? Math.ceil(total / limitNum) || 1 : 1;
 
         res.json({
             success: true,
             count: tasks.length,
+            total,
+            page: isPaginated ? pageNum : 1,
+            totalPages,
+            hasPrevPage: isPaginated ? pageNum > 1 : false,
+            hasNextPage: isPaginated ? pageNum < totalPages : false,
             data: tasks,
         });
     } catch (error) {

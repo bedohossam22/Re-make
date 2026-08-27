@@ -26,6 +26,11 @@ export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
   count?: number;
+  total?: number;
+  page?: number;
+  totalPages?: number;
+  hasPrevPage?: boolean;
+  hasNextPage?: boolean;
   data?: T;
   errors?: Array<{
     type?: string;
@@ -58,6 +63,10 @@ export interface TaskFilterState {
   status?: string;
   priority?: string;
   search?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: 'createdAt' | 'dueDate' | 'priority' | 'title';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface AuthContextType {
