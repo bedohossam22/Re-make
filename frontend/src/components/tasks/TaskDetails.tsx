@@ -82,7 +82,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
           </div>
 
           {/* Task Metadata */}
-          <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-slate-800 text-xs">
+          <div className="grid grid-cols-2 gap-4 py-3 border-t border-slate-800 text-xs">
             <div>
               <span className="text-slate-400 block mb-1">Due Date</span>
               <span className={`font-semibold ${overdue ? 'text-red-400 font-bold' : 'text-slate-200'}`}>
@@ -95,6 +95,57 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
               <span className="text-slate-300 font-medium">
                 {formatDate(task.createdAt)}
               </span>
+            </div>
+          </div>
+
+          {/* People: Creator & Assignees */}
+          <div className="space-y-3 pt-3 border-t border-slate-800 text-xs">
+            {task.createdBy && typeof task.createdBy === 'object' && (
+              <div>
+                <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400 block mb-1.5">
+                  Created By
+                </span>
+                <div className="flex items-center space-x-2 text-slate-200 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                  <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                    {task.createdBy.name.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="font-semibold">{task.createdBy.name}</div>
+                    <div className="text-[11px] text-slate-400">{task.createdBy.email}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400 block mb-1.5">
+                Assigned Members
+              </span>
+              {task.assignees && task.assignees.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {task.assignees.map((assignee, idx) => {
+                    const isObj = typeof assignee === 'object';
+                    const name = isObj ? assignee.name : 'Assigned User';
+                    const email = isObj ? assignee.email : '';
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center space-x-2 bg-slate-900/60 p-2 px-3 rounded-xl border border-slate-800 text-slate-200"
+                      >
+                        <div className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] uppercase shrink-0">
+                          {name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs">{name}</div>
+                          {email && <div className="text-[10px] text-slate-400">{email}</div>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-slate-500 italic">No assigned members</div>
+              )}
             </div>
           </div>
         </div>

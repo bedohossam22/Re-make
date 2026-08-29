@@ -1,6 +1,13 @@
 export type TaskPriority = 'Low' | 'Medium' | 'High';
 export type TaskStatus = 'To Do' | 'In Progress' | 'Done';
 
+export interface IUserSummary {
+  _id?: string;
+  id?: string;
+  name: string;
+  email: string;
+}
+
 export interface IUser {
   id: string;
   name: string;
@@ -17,7 +24,9 @@ export interface ITask {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate: string;
-  user: string;
+  user?: string | IUserSummary;
+  createdBy?: string | IUserSummary;
+  assignees?: (string | IUserSummary)[];
   createdAt: string;
   updatedAt: string;
 }

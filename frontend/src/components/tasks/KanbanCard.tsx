@@ -85,12 +85,44 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
 
       {/* Task Description snippet */}
       {task.description ? (
-        <p className="text-xs text-slate-400 line-clamp-2 mb-3 leading-relaxed">
+        <p className="text-xs text-slate-400 line-clamp-2 mb-2.5 leading-relaxed">
           {task.description}
         </p>
       ) : (
-        <p className="text-xs text-slate-600 italic mb-3">No description</p>
+        <p className="text-xs text-slate-600 italic mb-2.5">No description</p>
       )}
+
+      {/* Creator & Assignees */}
+      <div className="flex items-center justify-between gap-1.5 mb-2.5 text-[10px] text-slate-400">
+        {task.createdBy && typeof task.createdBy === 'object' ? (
+          <span className="truncate max-w-[100px]" title={`Created by ${task.createdBy.name}`}>
+            By: <strong className="text-slate-300 font-semibold">{task.createdBy.name}</strong>
+          </span>
+        ) : <span />}
+        {task.assignees && task.assignees.length > 0 && (
+          <div
+            className="flex items-center -space-x-1 overflow-hidden shrink-0"
+            title={`Assigned to: ${task.assignees.map((a) => (typeof a === 'object' ? a.name : 'User')).join(', ')}`}
+          >
+            {task.assignees.slice(0, 3).map((a, i) => {
+              const name = typeof a === 'object' ? a.name : 'U';
+              return (
+                <span
+                  key={i}
+                  className="inline-flex items-center justify-center w-4.5 h-4.5 rounded-full bg-indigo-600/80 ring-1 ring-slate-900 text-[9px] font-bold text-white uppercase"
+                >
+                  {name.charAt(0)}
+                </span>
+              );
+            })}
+            {task.assignees.length > 3 && (
+              <span className="inline-flex items-center justify-center w-4.5 h-4.5 rounded-full bg-slate-700 ring-1 ring-slate-900 text-[8px] font-bold text-slate-300">
+                +{task.assignees.length - 3}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Footer: Due date & status move buttons */}
       <div className="pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs">

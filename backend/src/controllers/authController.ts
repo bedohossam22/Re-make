@@ -131,3 +131,23 @@ export const login = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getUsers = async (req: Request, res: Response) => {
+    try {
+        const users = await User.find({}, '_id name email');
+        res.json({
+            success: true,
+            data: users.map((u) => ({
+                id: u._id.toString(),
+                name: u.name,
+                email: u.email,
+            })),
+        });
+    } catch (error) {
+        console.error('Get users error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error fetching users',
+        });
+    }
+};

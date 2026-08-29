@@ -43,7 +43,15 @@ import { Task } from '../models/Task';
 export const getTasks = async (req: Request, res: Response) => {
     try {
         const { status, priority, search, page, limit, sortBy, sortOrder } = req.query;
-        const query: any = { user: req.user._id };
+        const userId = req.user._id;
+
+        const query: any = {
+            $or: [
+                { createdBy: userId },
+                { assignees: userId },
+                { user: userId },
+            ],
+        };
 
         if (status) query.status = status;
         if (priority) query.priority = priority;
@@ -73,7 +81,11 @@ export const getTasks = async (req: Request, res: Response) => {
         const limitNum = Math.max(1, parseInt(String(limit || '10'), 10) || 10);
         const skip = (pageNum - 1) * limitNum;
 
-        let taskQuery = Task.find(query).sort(sortOptions);
+        let taskQuery = Task.find(query)
+            .populate('createdBy', 'name email')
+            .populate('assignees', 'name email')
+            .sort(sortOptions);
+
         if (isPaginated) {
             taskQuery = taskQuery.skip(skip).limit(limitNum);
         }
@@ -103,11 +115,18 @@ export const getTasks = async (req: Request, res: Response) => {
 export const getTaskById = async (req: Request, res: Response) => {
     try {
         const taskId = req.params.id;
+        const userId = req.user._id;
 
         const task = await Task.findOne({
             _id: taskId,
-            user: req.user._id,
-        });
+            $or: [
+                { createdBy: userId },
+                { assignees: userId },
+                { user: userId },
+            ],
+        })
+            .populate('createdBy', 'name email')
+            .populate('assignees', 'name email');
 
         if (!task) {
             return res.status(404).json({
@@ -127,6 +146,7 @@ export const getTaskById = async (req: Request, res: Response) => {
         });
     }
 };
+
 export const createTask = async (req: Request, res: Response) => {
     try {
         // - Check validation errors
@@ -138,10 +158,10 @@ export const createTask = async (req: Request, res: Response) => {
             });
         }
 
-        // - Destructure title, description, status, priority, dueDate from req.body
-        const { title, description, status, priority, dueDate } = req.body;
+        // - Destructure title, description, status, priority, dueDate, assignees from req.body
+        const { title, description, status, priority, dueDate, assignees } = req.body;
 
-        // - Create task with user: req.user._id
+        // - Create task with user, createdBy, and assignees
         const task = await Task.create({
             title,
             description,
@@ -149,7 +169,12 @@ export const createTask = async (req: Request, res: Response) => {
             priority,
             dueDate,
             user: req.user._id,
+            createdBy: req.user._id,
+            assignees: Array.isArray(assignees) ? assignees : [],
         });
+
+        await task.populate('createdBy', 'name email');
+        await task.populate('assignees', 'name email');
 
         // - Return 201 with created task
         res.status(201).json({
@@ -178,11 +203,16 @@ export const updateTask = async (req: Request, res: Response) => {
 
         // - Get task id from req.params
         const taskId = req.params.id;
+        const userId = req.user._id;
 
-        // - Find task by _id AND user: req.user._id
+        // - Find task by _id AND authorized visibility (createdBy OR assignees OR user)
         let task = await Task.findOne({
             _id: taskId,
-            user: req.user._id,
+            $or: [
+                { createdBy: userId },
+                { assignees: userId },
+                { user: userId },
+            ],
         });
 
         // - If not found -> 404
@@ -194,17 +224,20 @@ export const updateTask = async (req: Request, res: Response) => {
         }
 
         // - Destructure fields from req.body
-        const { title, description, status, priority, dueDate } = req.body;
+        const { title, description, status, priority, dueDate, assignees } = req.body;
 
         // - Update only fields that are provided
-        if (title) task.title = title;
+        if (title !== undefined) task.title = title;
         if (description !== undefined) task.description = description;
-        if (status) task.status = status;
-        if (priority) task.priority = priority;
-        if (dueDate) task.dueDate = dueDate;
+        if (status !== undefined) task.status = status;
+        if (priority !== undefined) task.priority = priority;
+        if (dueDate !== undefined) task.dueDate = dueDate;
+        if (assignees !== undefined && Array.isArray(assignees)) task.assignees = assignees;
 
         // - Save task
         await task.save();
+        await task.populate('createdBy', 'name email');
+        await task.populate('assignees', 'name email');
 
         // - Return updated task
         res.json({
@@ -223,10 +256,15 @@ export const updateTask = async (req: Request, res: Response) => {
 export const deleteTask = async (req: Request, res: Response) => {
     try {
         const taskId = req.params.id;
+        const userId = req.user._id;
 
         const task = await Task.findOneAndDelete({
             _id: taskId,
-            user: req.user._id,
+            $or: [
+                { createdBy: userId },
+                { assignees: userId },
+                { user: userId },
+            ],
         });
 
         if (!task) {

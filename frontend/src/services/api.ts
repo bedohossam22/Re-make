@@ -3,6 +3,7 @@ import type {
   ApiResponse,
   AuthData,
   ITask,
+  IUser,
   LoginCredentials,
   RegisterCredentials,
   TaskFilterState,
@@ -53,6 +54,11 @@ export const authService = {
 
   login: async (credentials: LoginCredentials): Promise<ApiResponse<AuthData>> => {
     const response = await api.post<ApiResponse<AuthData>>('/auth/login', credentials);
+    return response.data;
+  },
+
+  getUsers: async (): Promise<ApiResponse<IUser[]>> => {
+    const response = await api.get<ApiResponse<IUser[]>>('/auth/users');
     return response.data;
   },
 };

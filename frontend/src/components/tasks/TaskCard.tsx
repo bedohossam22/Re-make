@@ -77,12 +77,44 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
         {/* Task Description */}
         {task.description ? (
-          <p className="text-xs sm:text-sm text-slate-400 line-clamp-2 mb-4 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-400 line-clamp-2 mb-3 leading-relaxed">
             {task.description}
           </p>
         ) : (
-          <p className="text-xs sm:text-sm text-slate-500 italic mb-4">No description provided</p>
+          <p className="text-xs sm:text-sm text-slate-500 italic mb-3">No description provided</p>
         )}
+
+        {/* Creator & Assignees */}
+        <div className="flex items-center justify-between gap-2 mb-3 text-[11px] text-slate-400">
+          {task.createdBy && typeof task.createdBy === 'object' ? (
+            <span className="truncate" title={`Created by ${task.createdBy.name}`}>
+              By: <strong className="text-slate-300 font-semibold">{task.createdBy.name}</strong>
+            </span>
+          ) : <span />}
+          {task.assignees && task.assignees.length > 0 && (
+            <div
+              className="flex items-center -space-x-1.5 overflow-hidden shrink-0"
+              title={`Assigned to: ${task.assignees.map((a) => (typeof a === 'object' ? a.name : 'User')).join(', ')}`}
+            >
+              {task.assignees.slice(0, 3).map((a, i) => {
+                const name = typeof a === 'object' ? a.name : 'U';
+                return (
+                  <span
+                    key={i}
+                    className="inline-flex items-center justify-center w-5.5 h-5.5 rounded-full bg-indigo-600/80 ring-2 ring-slate-900 text-[10px] font-bold text-white uppercase"
+                  >
+                    {name.charAt(0)}
+                  </span>
+                );
+              })}
+              {task.assignees.length > 3 && (
+                <span className="inline-flex items-center justify-center w-5.5 h-5.5 rounded-full bg-slate-700 ring-2 ring-slate-900 text-[9px] font-bold text-slate-300">
+                  +{task.assignees.length - 3}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Card Footer: Due Date & Actions */}

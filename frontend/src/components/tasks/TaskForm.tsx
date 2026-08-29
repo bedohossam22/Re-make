@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { toast } from 'react-toastify';
-import type { ITask, TaskPriority, TaskStatus } from '../../types';
-import { taskService } from '../../services/api';
+import type { ITask, IUser, TaskPriority, TaskStatus } from '../../types';
+import { authService, taskService } from '../../services/api';
 import { formatInputDate, getErrorMessage } from '../../utils/helpers';
 
 interface TaskFormProps {
@@ -59,6 +59,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   onSubmitSuccess,
 }) => {
   const isEditMode = Boolean(task);
+  const [availableUsers, setAvailableUsers] = useState<IUser[]>([]);
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState<boolean>(false);
 
   const getTodayFormatted = () => {
     const d = new Date();
@@ -85,6 +88,25 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   });
 
   useEffect(() => {
+    if (isOpen) {
+      const fetchUsers = async () => {
+        setLoadingUsers(true);
+        try {
+          const res = await authService.getUsers();
+          if (res.success && res.data) {
+            setAvailableUsers(res.data);
+          }
+        } catch {
+          // ignore or handle silently
+        } finally {
+          setLoadingUsers(false);
+        }
+      };
+      fetchUsers();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     if (task) {
       reset({
         title: task.title,
@@ -93,6 +115,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         priority: task.priority,
         dueDate: formatInputDate(task.dueDate),
       });
+      if (task.assignees && Array.isArray(task.assignees)) {
+        const ids = task.assignees.map((a) =>
+          typeof a === 'string' ? a : a.id || a._id || ''
+        ).filter(Boolean);
+        setSelectedAssignees(ids);
+      } else {
+        setSelectedAssignees([]);
+      }
     } else {
       reset({
         title: '',
@@ -101,18 +131,31 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         priority: 'Medium',
         dueDate: getTodayFormatted(),
       });
+      setSelectedAssignees([]);
     }
   }, [task, initialStatus, reset, isOpen]);
 
   if (!isOpen) return null;
 
+  const toggleAssignee = (userId: string) => {
+    setSelectedAssignees((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
   const onSubmit = async (data: FormValues) => {
     try {
+      const payload = {
+        ...data,
+        assignees: selectedAssignees,
+      };
       if (isEditMode && task) {
-        await taskService.updateTask(task._id, data);
+        await taskService.updateTask(task._id, payload);
         toast.success('Task updated successfully!');
       } else {
-        await taskService.createTask(data);
+        await taskService.createTask(payload);
         toast.success('Task created successfully!');
       }
       onSubmitSuccess();
@@ -217,6 +260,46 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 <p className="mt-1 text-xs text-red-400 font-medium">{errors.dueDate.message}</p>
               )}
             </div>
+          </div>
+
+          {/* Assignees Selector */}
+          <div>
+            <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              Assign Members (Assignees)
+            </label>
+            {loadingUsers ? (
+              <div className="text-xs text-slate-400 py-2">Loading users...</div>
+            ) : availableUsers.length === 0 ? (
+              <div className="text-xs text-slate-500 italic py-1">No other users found</div>
+            ) : (
+              <div className="flex flex-wrap gap-2 pt-1 max-h-32 overflow-y-auto p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+                {availableUsers.map((user) => {
+                  const isSelected = selectedAssignees.includes(user.id);
+                  return (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => toggleAssignee(user.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5 border ${
+                        isSelected
+                          ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200'
+                          : 'bg-slate-800/80 border-slate-700/60 text-slate-400 hover:text-slate-200 hover:border-slate-600'
+                      }`}
+                    >
+                      <span className="w-5 h-5 rounded-full bg-slate-700 text-indigo-300 flex items-center justify-center text-[10px] font-bold uppercase shrink-0">
+                        {user.name.charAt(0)}
+                      </span>
+                      <span className="truncate max-w-[120px]">{user.name}</span>
+                      {isSelected && (
+                        <svg className="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Buttons */}

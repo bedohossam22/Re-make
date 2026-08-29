@@ -39,6 +39,11 @@ export const createTaskValidation = [
             }
             return true;
         }),
+
+    body('assignees')
+        .optional()
+        .isArray()
+        .withMessage('Assignees must be an array of user IDs'),
 ];
 
 // Validation rules for task update (all fields optional if omitted, but validated if provided)
@@ -80,4 +85,9 @@ export const updateTaskValidation = [
             }
             return true;
         }),
+
+    body('assignees')
+        .optional()
+        .isArray()
+        .withMessage('Assignees must be an array of user IDs'),
 ];

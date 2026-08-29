@@ -8,6 +8,7 @@ export interface ITask extends Document {
     dueDate: Date;
     user: mongoose.Types.ObjectId;
     createdBy?: mongoose.Types.ObjectId;
+    assignees?: mongoose.Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -52,6 +53,12 @@ const taskSchema = new Schema<ITask>(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
         },
+        assignees: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+            },
+        ],
     },
     {
         timestamps: true,
