@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import type { ITask, IUser, TaskPriority, TaskStatus } from '../../types';
 import { authService, taskService } from '../../services/api';
 import { formatInputDate, getErrorMessage } from '../../utils/helpers';
+import { useAuth } from '../../hooks/useAuth';
 
 interface TaskFormProps {
   task?: ITask | null;
@@ -58,6 +59,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   onClose,
   onSubmitSuccess,
 }) => {
+  const { user: currentUser } = useAuth();
   const isEditMode = Boolean(task);
   const [availableUsers, setAvailableUsers] = useState<IUser[]>([]);
   const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
@@ -131,9 +133,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         priority: 'Medium',
         dueDate: getTodayFormatted(),
       });
-      setSelectedAssignees([]);
+      const creatorId = currentUser?.id;
+      setSelectedAssignees(creatorId ? [creatorId] : []);
     }
-  }, [task, initialStatus, reset, isOpen]);
+  }, [task, initialStatus, reset, isOpen, currentUser]);
 
   if (!isOpen) return null;
 
@@ -275,6 +278,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               <div className="flex flex-wrap gap-2 pt-1 max-h-32 overflow-y-auto p-2 bg-slate-900/60 rounded-xl border border-slate-800">
                 {availableUsers.map((user) => {
                   const isSelected = selectedAssignees.includes(user.id);
+                  const isCreator = user.id === currentUser?.id;
                   return (
                     <button
                       key={user.id}
@@ -289,7 +293,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                       <span className="w-5 h-5 rounded-full bg-slate-700 text-indigo-300 flex items-center justify-center text-[10px] font-bold uppercase shrink-0">
                         {user.name.charAt(0)}
                       </span>
-                      <span className="truncate max-w-[120px]">{user.name}</span>
+                      <span className="truncate max-w-[120px]">
+                        {user.name} {isCreator && <span className="text-[10px] text-indigo-400 font-semibold">(You)</span>}
+                      </span>
                       {isSelected && (
                         <svg className="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />

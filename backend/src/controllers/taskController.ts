@@ -161,6 +161,16 @@ export const createTask = async (req: Request, res: Response) => {
         // - Destructure title, description, status, priority, dueDate, assignees from req.body
         const { title, description, status, priority, dueDate, assignees } = req.body;
 
+        // - Ensure creator is automatically included in assignees array
+        const creatorId = req.user._id.toString();
+        const assigneeSet = new Set<string>();
+        assigneeSet.add(creatorId);
+        if (Array.isArray(assignees)) {
+            assignees.forEach((id: string) => {
+                if (id) assigneeSet.add(String(id));
+            });
+        }
+
         // - Create task with user, createdBy, and assignees
         const task = await Task.create({
             title,
@@ -170,7 +180,7 @@ export const createTask = async (req: Request, res: Response) => {
             dueDate,
             user: req.user._id,
             createdBy: req.user._id,
-            assignees: Array.isArray(assignees) ? assignees : [],
+            assignees: Array.from(assigneeSet),
         });
 
         await task.populate('createdBy', 'name email');
