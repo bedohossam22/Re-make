@@ -7,15 +7,17 @@ import TaskList from '../components/tasks/TaskList';
 import KanbanBoard from '../components/tasks/KanbanBoard';
 import TaskForm from '../components/tasks/TaskForm';
 import TaskDetails from '../components/tasks/TaskDetails';
+import { NotificationBanner } from '../components/common/NotificationBanner';
 import { StatsSkeleton } from '../components/common/Skeleton';
-import type { ITask, TaskFilterState, TaskStatus } from '../types';
+import type { ITask, TaskFilterState, TaskStatus, PaginationMeta } from '../types';
 import { taskService } from '../services/api';
 import { isOverdue, getErrorMessage } from '../utils/helpers';
 
 export const DashboardPage: React.FC = () => {
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [filters, setFilters] = useState<TaskFilterState>({});
+  const [filters, setFilters] = useState<TaskFilterState>({ page: 1, limit: 10 });
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   // Modal states
@@ -33,9 +35,21 @@ export const DashboardPage: React.FC = () => {
   const fetchTasks = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await taskService.getTasks(filters);
+      // In Kanban view, fetch all tasks without pagination limit
+      const queryFilters = viewMode === 'kanban' ? { ...filters, limit: 100 } : filters;
+      const response = await taskService.getTasks(queryFilters);
       if (response.success && response.data) {
         setTasks(response.data);
+        if (response.total !== undefined && response.page !== undefined && response.totalPages !== undefined) {
+          setPaginationMeta({
+            page: response.page,
+            limit: filters.limit || 10,
+            total: response.total,
+            totalPages: response.totalPages,
+            hasPrevPage: !!response.hasPrevPage,
+            hasNextPage: !!response.hasNextPage,
+          });
+        }
       }
     } catch (err: any) {
       const msg = getErrorMessage(err);
@@ -43,7 +57,7 @@ export const DashboardPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, [filters, viewMode]);
 
   useEffect(() => {
     fetchTasks();
@@ -162,12 +176,19 @@ export const DashboardPage: React.FC = () => {
           </div>
         )}
 
+        {/* Notification Banner for Overdue / Due Soon Tasks */}
+        <NotificationBanner
+          tasks={tasks}
+          onFilterOverdue={() => setFilters((prev) => ({ ...prev, status: 'To Do', page: 1 }))}
+          onFilterDueSoon={() => setFilters((prev) => ({ ...prev, page: 1 }))}
+        />
+
         {/* Filters */}
         <TaskFilters
           filters={filters}
-          onFilterChange={setFilters}
-          onReset={() => setFilters({})}
-          totalTasks={totalCount}
+          onFilterChange={(newFilters) => setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }))}
+          onReset={() => setFilters({ page: 1, limit: 10 })}
+          totalTasks={paginationMeta ? paginationMeta.total : totalCount}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
         />
@@ -182,6 +203,9 @@ export const DashboardPage: React.FC = () => {
             onDeleteTask={(id) => setDeletingTaskId(id)}
             onStatusChange={handleStatusChange}
             onCreateTaskClick={() => handleOpenCreateModal()}
+            pagination={paginationMeta}
+            onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
+            onPageSizeChange={(limit) => setFilters((prev) => ({ ...prev, limit, page: 1 }))}
           />
         ) : (
           <KanbanBoard

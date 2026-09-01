@@ -1,7 +1,8 @@
 import React from 'react';
-import type { ITask, TaskStatus } from '../../types';
+import type { ITask, TaskStatus, PaginationMeta } from '../../types';
 import TaskCard from './TaskCard';
 import { TaskCardSkeleton } from '../common/Skeleton';
+import { Pagination } from '../common/Pagination';
 
 interface TaskListProps {
   tasks: ITask[];
@@ -11,6 +12,9 @@ interface TaskListProps {
   onDeleteTask: (taskId: string) => void;
   onStatusChange?: (task: ITask, newStatus: TaskStatus) => void;
   onCreateTaskClick?: () => void;
+  pagination?: PaginationMeta | null;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -60,17 +64,30 @@ export const TaskList: React.FC<TaskListProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-      {tasks.map((task) => (
-        <TaskCard
-          key={task._id}
-          task={task}
-          onView={onViewTask}
-          onEdit={onEditTask}
-          onDelete={onDeleteTask}
-          onStatusChange={onStatusChange}
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {tasks.map((task) => (
+          <TaskCard
+            key={task._id}
+            task={task}
+            onView={onViewTask}
+            onEdit={onEditTask}
+            onDelete={onDeleteTask}
+            onStatusChange={onStatusChange}
+          />
+        ))}
+      </div>
+
+      {pagination && onPageChange && (
+        <Pagination
+          currentPage={pagination.page}
+          totalPages={pagination.totalPages}
+          totalItems={pagination.total}
+          pageSize={pagination.limit}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
         />
-      ))}
+      )}
     </div>
   );
 };

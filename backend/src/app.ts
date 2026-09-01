@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/Mongodb';
 import { errorHandler } from './middleware/errorHandler';
+import { authLimiter, apiLimiter } from './middleware/rateLimiter';
 
 // Import routes
 import authRoutes from './routes/authRoutes';
@@ -17,12 +18,16 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = process.env.CLIENT_URL ? [process.env.CLIENT_URL, 'http://localhost:5173'] : '*';
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Apply rate limiting
+app.use('/api', apiLimiter);
+
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/tasks', taskRoutes);
 
 // Health check

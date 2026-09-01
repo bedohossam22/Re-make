@@ -31,6 +31,15 @@ export interface ITask {
   updatedAt: string;
 }
 
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+}
+
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
