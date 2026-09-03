@@ -25,6 +25,9 @@ export const TaskList: React.FC<TaskListProps> = ({
   onDeleteTask,
   onStatusChange,
   onCreateTaskClick,
+  pagination,
+  onPageChange,
+  onPageSizeChange,
 }) => {
   if (isLoading) {
     return (

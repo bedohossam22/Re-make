@@ -224,7 +224,12 @@ All task endpoints require the `Authorization: Bearer <token>` header.
 - [x] **Task Fields** — Title, description, status, priority, due date
 - [x] **Task Filtering** — Filter tasks by status and priority
 - [x] **Task Search** — Real-time search by title
-- [x] **Dashboard Stats** — Summary counts per status
+- [x] **Pagination Controls** — Paginated backend task responses & frontend pagination controls
+- [x] **Task Assignment** — Assign tasks to team members & multi-user visibility
+- [x] **Due Date Notifications** — Banner notifications & badges for overdue & upcoming tasks
+- [x] **Rate Limiting** — Express rate limiter on auth (`authLimiter`) & API endpoints (`apiLimiter`)
+- [x] **CORS Configuration** — Restrict origins in production via `CLIENT_URL`
+- [x] **Dashboard Stats** — Summary counts per status & overdue counts
 - [x] **Form Validation** — Frontend (yup + react-hook-form) and backend (express-validator)
 - [x] **Toast Notifications** — Success/error feedback via react-toastify
 - [x] **Responsive UI** — Mobile-friendly layout with TailwindCSS v4
@@ -232,17 +237,12 @@ All task endpoints require the `Authorization: Bearer <token>` header.
 
 ---
 
-## ❌ Known Issues & Incomplete Items
+## ❌ Known Issues & Future Enhancements
 
-- [ ] **No pagination** — All tasks fetched at once; may slow down with large datasets
-- [ ] **No task assignment** — Tasks are user-scoped only; no team/multi-user support
 - [ ] **No file attachments** — Task file uploads are not implemented
 - [ ] **No email verification** — Registration does not verify email addresses
 - [ ] **No password reset** — Forgot/reset password flow is not implemented
-- [ ] **No due date notifications** — No reminders or alerts for upcoming deadlines
 - [ ] **No refresh token** — JWT expires after 7 days with no silent refresh
-- [ ] **Open CORS** — `app.use(cors())` allows all origins; restrict in production
-- [ ] **No rate limiting** — Auth endpoints are unprotected against brute force
 - [ ] **No test suite** — Unit or integration tests have not been written
 
 ---
