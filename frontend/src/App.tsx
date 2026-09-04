@@ -8,6 +8,7 @@ import NotAuthorizedPage from './pages/NotAuthorizedPage';
 import ServerErrorPage from './pages/ServerErrorPage';
 import MaintenancePage from './pages/MaintenancePage';
 import NotFoundPage from './pages/NotFoundPage';
+import MoicContactPage from './pages/MoicContactPage';
 
 export const App: React.FC = () => {
   return (
@@ -15,6 +16,10 @@ export const App: React.FC = () => {
       {/* Public Auth Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+
+      {/* Contact Routes */}
+      <Route path="/contact" element={<MoicContactPage />} />
+      <Route path="/moic-contact" element={<Navigate to="/contact" replace />} />
 
       {/* Protected App Routes */}
       <Route element={<PrivateRoute />}>

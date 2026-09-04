@@ -58,9 +58,18 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Desktop Navigation / User Info & Actions */}
-        {user && (
-          <>
-            <div className="hidden md:flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-3">
+          <button
+            onClick={() => navigate('/contact')}
+            className="btn-secondary text-xs sm:text-sm flex items-center space-x-2 py-2 px-3.5 rounded-xl hover:border-indigo-500/50 hover:text-indigo-300 transition-colors"
+            title="MOIC Contact Us"
+          >
+            <span className="text-base">📩</span>
+            <span>MOIC Contact</span>
+          </button>
+
+          {user && (
+            <>
               <Timer />
               <div className="flex items-center space-x-3 bg-slate-900/80 border border-slate-800/80 rounded-full py-1.5 px-3.5 shadow-inner">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-teal-400 text-white font-bold flex items-center justify-center text-xs shadow-md">
@@ -92,54 +101,68 @@ export const Navbar: React.FC = () => {
                 </svg>
                 <span>Logout</span>
               </button>
-            </div>
+            </>
+          )}
+        </div>
 
-            {/* Mobile Hamburger Toggle Button */}
-            <div className="flex md:hidden items-center space-x-2">
-              <Timer />
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-xl text-slate-300 hover:text-white bg-slate-900/80 border border-slate-800 focus:outline-none"
-                aria-label="Toggle navigation menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </>
-        )}
+        {/* Mobile Hamburger Toggle Button */}
+        <div className="flex md:hidden items-center space-x-2">
+          {user && <Timer />}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 rounded-xl text-slate-300 hover:text-white bg-slate-900/80 border border-slate-800 focus:outline-none"
+            aria-label="Toggle navigation menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isMobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Mobile Drawer Menu */}
-      {user && isMobileMenuOpen && (
+      {isMobileMenuOpen && (
         <div className="md:hidden mt-3 pt-3 border-t border-slate-800 flex flex-col space-y-3 animate-fade-in">
-          <div className="flex items-center space-x-3 p-3 bg-slate-900/90 rounded-xl border border-slate-800">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-teal-400 text-white font-bold flex items-center justify-center text-sm shadow-md shrink-0">
-              {userInitials}
-            </div>
-            <div className="text-left leading-tight min-w-0">
-              <p className="text-sm font-semibold text-slate-100 truncate">{user.name}</p>
-              <p className="text-xs text-slate-400 truncate">{user.email}</p>
-            </div>
-          </div>
-
           <button
             onClick={() => {
               setIsMobileMenuOpen(false);
-              handleLogout();
+              navigate('/contact');
             }}
-            className="btn-danger text-sm flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl w-full"
+            className="btn-secondary text-sm flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl w-full"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span>Log out</span>
+            <span>📩 MOIC Contact Us</span>
           </button>
+
+          {user && (
+            <>
+              <div className="flex items-center space-x-3 p-3 bg-slate-900/90 rounded-xl border border-slate-800">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-teal-400 text-white font-bold flex items-center justify-center text-sm shadow-md shrink-0">
+                  {userInitials}
+                </div>
+                <div className="text-left leading-tight min-w-0">
+                  <p className="text-sm font-semibold text-slate-100 truncate">{user.name}</p>
+                  <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="btn-danger text-sm flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl w-full"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Log out</span>
+              </button>
+            </>
+          )}
         </div>
       )}
     </nav>

@@ -8,6 +8,7 @@ import { authLimiter, apiLimiter } from './middleware/rateLimiter';
 // Import routes
 import authRoutes from './routes/authRoutes';
 import taskRoutes from './routes/taskRoutes';
+import contactRoutes from './routes/contactRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -29,6 +30,7 @@ app.use('/api', apiLimiter);
 // Routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

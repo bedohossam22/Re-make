@@ -7,6 +7,9 @@ import type {
   LoginCredentials,
   RegisterCredentials,
   TaskFilterState,
+  IContactForm,
+  IContactResponseData,
+  ITicketStatusInfo,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -98,6 +101,19 @@ export const taskService = {
 
   deleteTask: async (id: string): Promise<ApiResponse<{ message: string }>> => {
     const response = await api.delete<ApiResponse<{ message: string }>>(`/tasks/${id}`);
+    return response.data;
+  },
+};
+
+// MOIC Contact Service Endpoints
+export const contactService = {
+  submitContactForm: async (formData: IContactForm): Promise<ApiResponse<IContactResponseData>> => {
+    const response = await api.post<ApiResponse<IContactResponseData>>('/contact', formData);
+    return response.data;
+  },
+
+  getTicketStatus: async (ticketId: string): Promise<ApiResponse<ITicketStatusInfo>> => {
+    const response = await api.get<ApiResponse<ITicketStatusInfo>>(`/contact/ticket/${encodeURIComponent(ticketId)}`);
     return response.data;
   },
 };

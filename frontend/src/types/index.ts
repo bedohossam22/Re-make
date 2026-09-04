@@ -96,3 +96,41 @@ export interface AuthContextType {
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
 }
+
+export type ContactPriority = 'Low' | 'Normal' | 'High' | 'Urgent';
+
+export interface IContactForm {
+  name: string;
+  email: string;
+  phone?: string;
+  organization?: string;
+  department: string;
+  subject: string;
+  priority: ContactPriority;
+  message: string;
+}
+
+export interface IContactResponseData {
+  ticketId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  organization?: string;
+  department: string;
+  subject: string;
+  priority: ContactPriority;
+  message: string;
+  status: 'Open' | 'In Progress' | 'Resolved';
+  createdAt: string | Date;
+}
+
+export interface ITicketStatusInfo {
+  ticketId: string;
+  name?: string;
+  department: string;
+  subject: string;
+  priority: ContactPriority;
+  status: 'Open' | 'In Progress' | 'Resolved';
+  createdAt: string | Date;
+}
+
