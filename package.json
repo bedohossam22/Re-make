@@ -1,0 +1,23 @@
+{
+  "name": "management-app-starter",
+  "version": "1.0.0",
+  "description": "A full-stack task management application built with **React + TypeScript** (frontend) and **Node.js + Express + MongoDB** (backend), featuring JWT authentication, full CRUD task operations, filtering, and search.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bedohossam22/Re-make.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/bedohossam22/Re-make/issues"
+  },
+  "homepage": "https://github.com/bedohossam22/Re-make#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.4.1"
+  }
+}
