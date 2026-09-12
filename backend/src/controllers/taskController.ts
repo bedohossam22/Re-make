@@ -158,8 +158,8 @@ export const createTask = async (req: Request, res: Response) => {
             });
         }
 
-        // - Destructure title, description, status, priority, dueDate, assignees from req.body
-        const { title, description, status, priority, dueDate, assignees } = req.body;
+        // - Destructure title, description, status, priority, dueDate, assignees, subtasks from req.body
+        const { title, description, status, priority, dueDate, assignees, subtasks } = req.body;
 
         // - Ensure creator is automatically included in assignees array
         const creatorId = req.user._id.toString();
@@ -171,7 +171,7 @@ export const createTask = async (req: Request, res: Response) => {
             });
         }
 
-        // - Create task with user, createdBy, and assignees
+        // - Create task with user, createdBy, assignees, and subtasks
         const task = await Task.create({
             title,
             description,
@@ -181,6 +181,7 @@ export const createTask = async (req: Request, res: Response) => {
             user: req.user._id,
             createdBy: req.user._id,
             assignees: Array.from(assigneeSet),
+            subtasks: Array.isArray(subtasks) ? subtasks : [],
         });
 
         await task.populate('createdBy', 'name email');
@@ -234,7 +235,7 @@ export const updateTask = async (req: Request, res: Response) => {
         }
 
         // - Destructure fields from req.body
-        const { title, description, status, priority, dueDate, assignees } = req.body;
+        const { title, description, status, priority, dueDate, assignees, subtasks } = req.body;
 
         // - Update only fields that are provided
         if (title !== undefined) task.title = title;
@@ -243,6 +244,7 @@ export const updateTask = async (req: Request, res: Response) => {
         if (priority !== undefined) task.priority = priority;
         if (dueDate !== undefined) task.dueDate = dueDate;
         if (assignees !== undefined && Array.isArray(assignees)) task.assignees = assignees;
+        if (subtasks !== undefined && Array.isArray(subtasks)) task.subtasks = subtasks;
 
         // - Save task
         await task.save();

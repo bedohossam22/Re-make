@@ -236,6 +236,7 @@ export const DashboardPage: React.FC = () => {
         onClose={() => setIsDetailsOpen(false)}
         onEdit={handleOpenEditModal}
         onDelete={(id) => setDeletingTaskId(id)}
+        onTaskUpdated={fetchTasks}
       />
 
       {/* Delete Confirmation Dialog */}

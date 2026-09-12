@@ -58,6 +58,11 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
   const prevStatus = getPreviousStatus(task.status);
   const nextStatus = getNextStatus(task.status);
 
+  const subtasks = task.subtasks || [];
+  const totalSubtasks = subtasks.length;
+  const completedSubtasks = subtasks.filter((s) => s.completed).length;
+  const percentCompleted = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
+
   return (
     <div
       draggable
@@ -90,6 +95,29 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
         </p>
       ) : (
         <p className="text-xs text-slate-600 italic mb-2.5">No description</p>
+      )}
+
+      {/* Subtasks Progress */}
+      {totalSubtasks > 0 && (
+        <div className="mb-2.5 space-y-1 bg-slate-950/40 p-2 rounded-lg border border-slate-800/60">
+          <div className="flex items-center justify-between text-[10px] text-slate-400">
+            <span className="flex items-center gap-1 font-medium">
+              <svg className="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 00-2 2h2a2 2 0 002-2m-6 9l2 2 4-4" />
+              </svg>
+              <span>Checklist</span>
+            </span>
+            <span className="text-slate-300 font-semibold">{completedSubtasks}/{totalSubtasks}</span>
+          </div>
+          <div className="w-full bg-slate-800 rounded-full h-1 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${
+                percentCompleted === 100 ? 'bg-emerald-400' : 'bg-indigo-500'
+              }`}
+              style={{ width: `${percentCompleted}%` }}
+            />
+          </div>
+        </div>
       )}
 
       {/* Creator & Assignees */}

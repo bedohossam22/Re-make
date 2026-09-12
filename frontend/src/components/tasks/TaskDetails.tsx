@@ -1,6 +1,8 @@
-import React from 'react';
-import type { ITask } from '../../types';
+import React, { useState, useEffect } from 'react';
+import type { ITask, ISubtask } from '../../types';
 import { useTimer } from '../../context/TimerContext';
+import { taskService } from '../../services/api';
+import { toast } from 'react-toastify';
 import {
   formatDate,
   isOverdue,
@@ -14,6 +16,7 @@ interface TaskDetailsProps {
   onClose: () => void;
   onEdit: (task: ITask) => void;
   onDelete: (taskId: string) => void;
+  onTaskUpdated?: () => void;
 }
 
 export const TaskDetails: React.FC<TaskDetailsProps> = ({
@@ -22,8 +25,18 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
   onClose,
   onEdit,
   onDelete,
+  onTaskUpdated,
 }) => {
   const { setAttachedTask, setIsModalOpen, startTimer } = useTimer();
+  const [subtasks, setSubtasks] = useState<ISubtask[]>([]);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const [isUpdatingSubtasks, setIsUpdatingSubtasks] = useState(false);
+
+  useEffect(() => {
+    if (task) {
+      setSubtasks(task.subtasks || []);
+    }
+  }, [task]);
 
   if (!isOpen || !task) return null;
 
@@ -35,6 +48,45 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
     startTimer();
     setIsModalOpen(true);
   };
+
+  const handleSaveSubtasks = async (updatedList: ISubtask[]) => {
+    setSubtasks(updatedList);
+    setIsUpdatingSubtasks(true);
+    try {
+      await taskService.updateTask(task._id, { subtasks: updatedList });
+      if (onTaskUpdated) onTaskUpdated();
+    } catch {
+      toast.error('Failed to update subtask');
+    } finally {
+      setIsUpdatingSubtasks(false);
+    }
+  };
+
+  const handleToggleSubtask = (index: number) => {
+    const updated = subtasks.map((st, i) =>
+      i === index ? { ...st, completed: !st.completed } : st
+    );
+    handleSaveSubtasks(updated);
+  };
+
+  const handleAddSubtask = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = newSubtaskTitle.trim();
+    if (!trimmed) return;
+
+    const updated = [...subtasks, { title: trimmed, completed: false }];
+    setNewSubtaskTitle('');
+    handleSaveSubtasks(updated);
+  };
+
+  const handleDeleteSubtask = (index: number) => {
+    const updated = subtasks.filter((_, i) => i !== index);
+    handleSaveSubtasks(updated);
+  };
+
+  const totalSubtasks = subtasks.length;
+  const completedSubtasks = subtasks.filter((s) => s.completed).length;
+  const percentCompleted = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
@@ -79,6 +131,100 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
             <p className="text-xs sm:text-sm text-slate-300 whitespace-pre-wrap bg-slate-900/80 p-4 rounded-xl border border-slate-800 leading-relaxed min-h-[80px]">
               {task.description || 'No detailed description provided for this task.'}
             </p>
+          </div>
+
+          {/* Subtasks Checklist Section */}
+          <div className="pt-3 border-t border-slate-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-[11px] uppercase tracking-wider font-bold text-slate-400 flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 00-2 2h2a2 2 0 00-2m-6 9l2 2 4-4" />
+                </svg>
+                Subtasks Checklist
+              </h4>
+              {totalSubtasks > 0 && (
+                <span className="text-xs font-semibold text-indigo-300">
+                  {completedSubtasks} / {totalSubtasks} ({percentCompleted}%)
+                </span>
+              )}
+            </div>
+
+            {/* Subtask Progress Bar */}
+            {totalSubtasks > 0 && (
+              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    percentCompleted === 100 ? 'bg-emerald-400' : 'bg-indigo-500'
+                  }`}
+                  style={{ width: `${percentCompleted}%` }}
+                />
+              </div>
+            )}
+
+            {/* Checklist items list */}
+            <div className="space-y-2 bg-slate-900/60 p-3 rounded-xl border border-slate-800 max-h-48 overflow-y-auto">
+              {subtasks.length === 0 ? (
+                <div className="text-xs text-slate-500 italic text-center py-2">
+                  No subtasks added yet. Add one below!
+                </div>
+              ) : (
+                subtasks.map((st, idx) => (
+                  <div
+                    key={st._id || idx}
+                    className="flex items-center justify-between p-2 rounded-lg bg-slate-950/40 border border-slate-800/80 hover:border-slate-700/60 transition-colors group"
+                  >
+                    <label className="flex items-center space-x-3 cursor-pointer flex-1 min-w-0 pr-2">
+                      <input
+                        type="checkbox"
+                        checked={st.completed}
+                        disabled={isUpdatingSubtasks}
+                        onChange={() => handleToggleSubtask(idx)}
+                        className="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-900 cursor-pointer accent-indigo-500"
+                      />
+                      <span
+                        className={`text-xs sm:text-sm truncate select-none ${
+                          st.completed ? 'line-through text-slate-500' : 'text-slate-200 font-medium'
+                        }`}
+                      >
+                        {st.title}
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteSubtask(idx)}
+                      disabled={isUpdatingSubtasks}
+                      className="text-slate-500 hover:text-red-400 p-1 rounded transition-colors opacity-80 group-hover:opacity-100"
+                      title="Remove subtask"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Quick Add Subtask Input */}
+            <form onSubmit={handleAddSubtask} className="flex gap-2">
+              <input
+                type="text"
+                value={newSubtaskTitle}
+                onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                placeholder="Add a new subtask..."
+                className="input-field text-xs py-2 bg-slate-900/90"
+              />
+              <button
+                type="submit"
+                disabled={!newSubtaskTitle.trim() || isUpdatingSubtasks}
+                className="btn-primary text-xs py-2 px-3 shrink-0 flex items-center gap-1 disabled:opacity-50"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add</span>
+              </button>
+            </form>
           </div>
 
           {/* Task Metadata */}

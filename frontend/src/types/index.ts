@@ -17,6 +17,13 @@ export interface IUser {
   updatedAt?: string;
 }
 
+export interface ISubtask {
+  _id?: string;
+  id?: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface ITask {
   _id: string;
   title: string;
@@ -27,6 +34,7 @@ export interface ITask {
   user?: string | IUserSummary;
   createdBy?: string | IUserSummary;
   assignees?: (string | IUserSummary)[];
+  subtasks?: ISubtask[];
   createdAt: string;
   updatedAt: string;
 }

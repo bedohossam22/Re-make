@@ -1,5 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+export interface ISubtask {
+    _id?: string;
+    title: string;
+    completed: boolean;
+}
+
 export interface ITask extends Document {
     title: string;
     description?: string;
@@ -9,6 +15,7 @@ export interface ITask extends Document {
     user: mongoose.Types.ObjectId;
     createdBy?: mongoose.Types.ObjectId;
     assignees?: mongoose.Types.ObjectId[];
+    subtasks?: ISubtask[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -16,6 +23,22 @@ export interface ITask extends Document {
 
 
 // Task Schema 
+
+const subtaskSchema = new Schema<ISubtask>(
+    {
+        title: {
+            type: String,
+            required: [true, 'Subtask title is required'],
+            trim: true,
+            maxlength: [200, 'Subtask title cannot exceed 200 characters'],
+        },
+        completed: {
+            type: Boolean,
+            default: false,
+        },
+    },
+    { _id: true }
+);
 
 const taskSchema = new Schema<ITask>(
     {
@@ -59,6 +82,7 @@ const taskSchema = new Schema<ITask>(
                 ref: 'User',
             },
         ],
+        subtasks: [subtaskSchema],
     },
     {
         timestamps: true,

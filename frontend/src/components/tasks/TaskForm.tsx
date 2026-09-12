@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { toast } from 'react-toastify';
-import type { ITask, IUser, TaskPriority, TaskStatus } from '../../types';
+import type { ITask, IUser, TaskPriority, TaskStatus, ISubtask } from '../../types';
 import { authService, taskService } from '../../services/api';
 import { formatInputDate, getErrorMessage } from '../../utils/helpers';
 import { useAuth } from '../../hooks/useAuth';
@@ -64,6 +64,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const [availableUsers, setAvailableUsers] = useState<IUser[]>([]);
   const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false);
+  const [subtasks, setSubtasks] = useState<ISubtask[]>([]);
+  const [newSubtaskInput, setNewSubtaskInput] = useState('');
 
   const getTodayFormatted = () => {
     const d = new Date();
@@ -117,6 +119,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         priority: task.priority,
         dueDate: formatInputDate(task.dueDate),
       });
+      setSubtasks(task.subtasks ? task.subtasks.map(s => ({ ...s })) : []);
       if (task.assignees && Array.isArray(task.assignees)) {
         const ids = task.assignees.map((a) =>
           typeof a === 'string' ? a : a.id || a._id || ''
@@ -133,9 +136,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         priority: 'Medium',
         dueDate: getTodayFormatted(),
       });
+      setSubtasks([]);
       const creatorId = currentUser?.id;
       setSelectedAssignees(creatorId ? [creatorId] : []);
     }
+    setNewSubtaskInput('');
   }, [task, initialStatus, reset, isOpen, currentUser]);
 
   if (!isOpen) return null;
@@ -148,11 +153,29 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     );
   };
 
+  const handleAddSubtaskItem = () => {
+    const trimmed = newSubtaskInput.trim();
+    if (!trimmed) return;
+    setSubtasks((prev) => [...prev, { title: trimmed, completed: false }]);
+    setNewSubtaskInput('');
+  };
+
+  const handleToggleSubtaskItem = (index: number) => {
+    setSubtasks((prev) =>
+      prev.map((st, i) => (i === index ? { ...st, completed: !st.completed } : st))
+    );
+  };
+
+  const handleRemoveSubtaskItem = (index: number) => {
+    setSubtasks((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const onSubmit = async (data: FormValues) => {
     try {
       const payload = {
         ...data,
         assignees: selectedAssignees,
+        subtasks,
       };
       if (isEditMode && task) {
         await taskService.updateTask(task._id, payload);
@@ -306,6 +329,77 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 })}
               </div>
             )}
+          </div>
+
+          {/* Subtasks / Checklist Manager */}
+          <div>
+            <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Subtasks / Checklist</span>
+              {subtasks.length > 0 && (
+                <span className="text-[10px] text-indigo-400 font-semibold lowercase">
+                  {subtasks.filter(s => s.completed).length}/{subtasks.length} completed
+                </span>
+              )}
+            </label>
+
+            {/* Subtask list */}
+            {subtasks.length > 0 && (
+              <div className="space-y-1.5 mb-2.5 max-h-36 overflow-y-auto p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+                {subtasks.map((st, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-2 rounded-lg bg-slate-950/40 border border-slate-800/80"
+                  >
+                    <label className="flex items-center space-x-2.5 cursor-pointer flex-1 min-w-0 pr-2">
+                      <input
+                        type="checkbox"
+                        checked={st.completed}
+                        onChange={() => handleToggleSubtaskItem(idx)}
+                        className="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-900 cursor-pointer accent-indigo-500"
+                      />
+                      <span className={`text-xs truncate ${st.completed ? 'line-through text-slate-500' : 'text-slate-200 font-medium'}`}>
+                        {st.title}
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSubtaskItem(idx)}
+                      className="text-slate-500 hover:text-red-400 p-1 transition-colors"
+                      title="Remove subtask"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add Subtask Input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newSubtaskInput}
+                onChange={(e) => setNewSubtaskInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddSubtaskItem();
+                  }
+                }}
+                placeholder="Add subtask item..."
+                className="input-field text-xs py-2 bg-slate-900/90"
+              />
+              <button
+                type="button"
+                onClick={handleAddSubtaskItem}
+                disabled={!newSubtaskInput.trim()}
+                className="btn-secondary text-xs py-2 px-3 shrink-0 disabled:opacity-50"
+              >
+                Add Item
+              </button>
+            </div>
           </div>
 
           {/* Buttons */}

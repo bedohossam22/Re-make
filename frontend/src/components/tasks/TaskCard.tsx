@@ -49,6 +49,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
   const isCurrentFocusTask = attachedTaskId === task._id;
 
+  const subtasks = task.subtasks || [];
+  const totalSubtasks = subtasks.length;
+  const completedSubtasks = subtasks.filter((s) => s.completed).length;
+  const percentCompleted = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
+
   return (
     <div
       onClick={() => onView(task)}
@@ -82,6 +87,31 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           </p>
         ) : (
           <p className="text-xs sm:text-sm text-slate-500 italic mb-3">No description provided</p>
+        )}
+
+        {/* Subtask Checklist Progress Bar */}
+        {totalSubtasks > 0 && (
+          <div className="mb-3 space-y-1 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+            <div className="flex items-center justify-between text-[11px] font-medium text-slate-400">
+              <span className="flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 00-2 2h2a2 2 0 002-2m-6 9l2 2 4-4" />
+                </svg>
+                <span>Subtasks</span>
+              </span>
+              <span className="text-slate-300 font-semibold text-[10px]">
+                {completedSubtasks}/{totalSubtasks} ({percentCompleted}%)
+              </span>
+            </div>
+            <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  percentCompleted === 100 ? 'bg-emerald-400' : 'bg-indigo-500'
+                }`}
+                style={{ width: `${percentCompleted}%` }}
+              />
+            </div>
+          </div>
         )}
 
         {/* Creator & Assignees */}
